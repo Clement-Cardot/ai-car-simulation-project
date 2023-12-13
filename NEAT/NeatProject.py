@@ -24,6 +24,8 @@ BORDER_COLOR = (255, 255, 255, 255) # Color To Crash on Hit
 
 current_generation = 0 # Generation counter
 
+time_training = 0
+
 class Car:
 
     def __init__(self):
@@ -178,15 +180,19 @@ def run_simulation(genomes, config):
     clock = pygame.time.Clock()
     generation_font = pygame.font.SysFont("Arial", 30)
     alive_font = pygame.font.SysFont("Arial", 20)
-    game_map = pygame.image.load('../assets/map4.png').convert() # Convert Speeds Up A Lot
+    game_map = pygame.image.load('../assets/map3.png').convert() # Convert Speeds Up A Lot
 
     global current_generation
     current_generation += 1
+
+    global time_training
 
     # Simple Counter To Roughly Limit Time (Not Good Practice)
     counter = 0
 
     while True:
+        time_training += 1
+
         # Exit On Quit Event
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -231,12 +237,17 @@ def run_simulation(genomes, config):
         # Display Info
         text = generation_font.render("Generation: " + str(current_generation), True, (0,0,0))
         text_rect = text.get_rect()
-        text_rect.center = (900, 450)
+        text_rect.center = (120, 20)
         screen.blit(text, text_rect)
 
         text = alive_font.render("Still Alive: " + str(still_alive), True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (900, 490)
+        text_rect.center = (120, 70)
+        screen.blit(text, text_rect)
+
+        text = generation_font.render("Time: " + str(time_training), True, (0, 0, 0))
+        text_rect = text.get_rect()
+        text_rect.center = (120, 110)
         screen.blit(text, text_rect)
 
         pygame.display.flip()
@@ -259,8 +270,8 @@ if __name__ == "__main__":
     population.add_reporter(stats)
 
     # Run Simulation For A Maximum of 1000 Generations
-    winner = population.run(run_simulation, 25)
+    winner = population.run(run_simulation, 40)
 
     # Save the winner (best genome) to a file
-    with open('winner_map4.pkl', 'wb') as f:
+    with open('winner_map5.pkl', 'wb') as f:
         pickle.dump(winner, f)
