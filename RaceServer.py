@@ -7,7 +7,7 @@ import pygame
 from CarServer import CarServer
 
 HOST = "0.0.0.0"
-PORT = 1234
+PORT = 1236
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -88,6 +88,7 @@ class RaceServer:
             tick += 1
 
         # Close connections
+        print('terminado')
         for car in self.cars:
             car.conn.close()
 
@@ -98,6 +99,10 @@ class RaceServer:
         # Draw Cars
         for car in self.cars:
             car.draw()
+            text = self.font.render("ID :" + str(car.car_id), True, (100, 100, 100))
+            text_rect = text.get_rect()
+            text_rect.center = (car.position[0], car.position[1])
+            self.screen.blit(text, text_rect)
 
         # Display Info
         self.display_info()

@@ -55,50 +55,54 @@ class CarServer:
         self.time = 0  # Time Passed
 
     def step(self):
-        print("Server Car {} step".format(self.car_id))
+        #print("Server Car {} step".format(self.car_id))
         # Receive Action From Client
-        print("Server Car {} waiting step packet".format(self.car_id))
-        action = self.conn.recv(1024)
-        if action == 0:
-            self.conn.close()
-            self.isConnected = False
-            return
-        action = action.decode('utf-8')
-        # print("Server Car {} received: {}".format(self.car_id, action))
-        try:
-            match: Iterator = re.finditer(ACTION_PACKET_REGEX, action).__next__()
-        except StopIteration:
-            # Check if reset
+        print("Server Car {} WAIT".format(self.car_id))
+        action = 'r'
+        while (action == 'r'):
+
+            action = self.conn.recv(1024)
+            if action == 0:
+                print('deconnected')
+                self.conn.close()
+                self.isConnected = False
+                return
+            action = action.decode('utf-8')
+            # print("Server Car {} received: {}".format(self.car_id, action))
+
             if action == "r":
                 self.reset()
-                return
-            print("Server Car {}: Invalid action packet received: '{}'".format(self.car_id, action))
+            else:
+                try:
+                    match: Iterator = re.finditer(ACTION_PACKET_REGEX, action).__next__()
+                except StopIteration:
+                    print("Server Car {}: Invalid action packet received: '{}'".format(self.car_id, action))
 
-        steering = float(match.group(1))
-        throttle = float(match.group(2))
+                steering = float(match.group(1))
+                throttle = float(match.group(2))
 
-        # Execute action
-        self.action([steering, throttle])
+                # Execute action
+                self.action([steering, throttle])
 
-        # Update car state
-        self.update()
+                # Update car state
+                self.update()
 
-        # Get return data
-        obs = self.radars
-        reward = self.get_reward()
-        terminated = not self.is_alive()
+                # Get return data
+                obs = self.radars
+                reward = self.get_reward()
+                terminated = not self.is_alive()
 
-        # Send data to client
-        self.conn.sendall(str.encode("o" + str(obs[0][1])
-                                     + "," + str(obs[1][1])
-                                     + "," + str(obs[2][1])
-                                     + "," + str(obs[3][1])
-                                     + "," + str(obs[4][1])
-                                     + "r" + f"{reward:.2f}"
-                                     + "t" + str(int(terminated))))
+                # Send data to client
+                self.conn.sendall(str.encode("o" + str(obs[0][1])
+                                             + "," + str(obs[1][1])
+                                             + "," + str(obs[2][1])
+                                             + "," + str(obs[3][1])
+                                             + "," + str(obs[4][1])
+                                             + "r" + f"{reward:.2f}"
+                                             + "t" + str(int(terminated))))
 
     def reset(self):
-        print("Server Car {} reset".format(self.car_id))
+        #print("Server Car {} RESET".format(self.car_id))
         self.rotated_sprite = self.SPRITE
 
         # Starting Position

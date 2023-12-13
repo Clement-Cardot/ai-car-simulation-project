@@ -5,19 +5,23 @@ import sys
 import numpy as np
 import math
 import pygame
+import select
 from gymnasium import spaces
 from stable_baselines3.common.env_checker import check_env
 from stable_baselines3 import A2C
 
 import CarServer
 
+iteration = 0
+
 ACTION_PACKET_REGEX = re.compile("^o((\d{1,3},?){5})r(\d+.\d+)t([01])$")
 RESET_PACKET_REGEX = re.compile("^o((\d{1,3},?){5})$")
 
 HOST = "127.0.0.1"
-PORT = 1234
+PORT = 1236
 
 class CarClient(gym.Env):
+    print('init')
     metadata = {'render.modes': ['human']}
 
     def __init__(self, id=0):
@@ -39,7 +43,9 @@ class CarClient(gym.Env):
             sys.exit(1)
 
     def step(self, action):
-        print("Client {} step".format(self.id))
+        #print("Client {} step Iteration :".format(self.id))
+
+
         steering_action = action[0]  # steering value between -1 and 1
         throttle_action = action[1]  # throttle value between -1 and 1
         action_packet = f"s{steering_action:.2f}t{throttle_action:.2f}"
@@ -48,7 +54,10 @@ class CarClient(gym.Env):
         self.conn.send(action_packet.encode('utf-8'))
 
         # Wait for answer
-        print("Client {} waiting step packet".format(self.id))
+        #print("Client {} STEP WAIT. Iteration :".format(self.id))
+        global iteration
+        iteration += 1
+        #print(iteration)
         answer = self.conn.recv(1024).decode('utf-8')
         # print("Client {} received: {}".format(self.id, answer))
         match = re.finditer(ACTION_PACKET_REGEX, answer).__next__()
@@ -61,15 +70,24 @@ class CarClient(gym.Env):
         reward = float(match.group(3))
         terminated = bool(int(match.group(4)))
 
+        #print("Client {} STEP RECEIVED".format(self.id))
+        #print(terminated)
+        #print(obs)
+        #print(reward)
+
         return obs, reward, terminated, False, {}
 
     def reset(self, **kwargs):
-        print("Client {} reset".format(self.id))
+        #print("Client {} reset".format(self.id))
         # Send Reset Packet To Server
         self.conn.send("r".encode('utf-8'))
 
-        # Wait for reset packet
-        print("Client {} waiting reset packet".format(self.id))
+        # Wait for reset packet with a timeout of 2 seconds
+        print("Client {} WAIT RESET. Iteration :".format(self.id))
+        global iteration
+        iteration += 1
+        print(iteration)
+
         answer = self.conn.recv(1024).decode('utf-8')
         # print("Client {} received: {}".format(self.id, answer))
         match = re.finditer(RESET_PACKET_REGEX, answer).__next__()
@@ -77,6 +95,8 @@ class CarClient(gym.Env):
         obs = np.array([0, 0, 0, 0, 0], dtype=np.float32)
         for i, radar in enumerate(radars):
             obs[i] = radar / CarServer.RADAR_MAX_LENGTH
+
+        #print("Client {} RECEIVED RESET".format(self.id))
 
         return obs, {}
 

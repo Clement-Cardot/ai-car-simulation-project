@@ -46,7 +46,7 @@ def thread_race(NB_CARS):
 
 if __name__ == '__main__':
 
-    NB_CARS = 1
+    NB_CARS = 12
 
     # Start Race Server
     race = threading.Thread(target=thread_race, args=(NB_CARS,))
