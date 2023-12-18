@@ -18,7 +18,7 @@ CAR_SIZE_Y = 60
 
 class RaceServer:
 
-    def __init__(self, NB_CARS=1):
+    def __init__(self, NB_CARS=1, NB_MAPS=1):
         self.NB_CARS = NB_CARS
         # Initialize a socket server
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +32,7 @@ class RaceServer:
         self.clock = pygame.time.Clock()
         self.SPRITE = pygame.image.load('assets/car.png').convert()  # Convert Speeds Up A Lot
         self.SPRITE = pygame.transform.scale(self.SPRITE, (CAR_SIZE_X, CAR_SIZE_Y))
-        self.MAP = pygame.image.load('assets/map2.png').convert()  # Convert Speeds Up A Lot
+        self.MAP = pygame.image.load('assets/map{}.png'.format(NB_MAPS)).convert()  # Convert Speeds Up A Lot
         self.font = pygame.font.SysFont("Arial", 30)
 
         # Create an empty list of cars

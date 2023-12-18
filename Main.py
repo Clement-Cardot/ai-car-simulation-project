@@ -41,15 +41,16 @@ def train_monoproccess(algo):
         case "A2C":
             A2Cmodel = A2C("MlpPolicy", car).learn(total_timesteps=900000)
 
-def thread_race(NB_CARS):
-    RaceServer(NB_CARS).run()
+def thread_race(NB_CARS, NB_MAPS):
+    RaceServer(NB_CARS, NB_MAPS).run()
 
 if __name__ == '__main__':
 
-    NB_CARS = 12
+    NB_CARS = 8
+    NB_MAPS = 1
 
     # Start Race Server
-    race = threading.Thread(target=thread_race, args=(NB_CARS,))
+    race = threading.Thread(target=thread_race, args=(NB_CARS, NB_MAPS))
     race.start()
 
     if NB_CARS == 1:
