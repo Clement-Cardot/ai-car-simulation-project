@@ -105,6 +105,7 @@ class RaceServer:
             self.screen.blit(text, text_rect)
 
         # Display Info
+        self.set_best_reward()
         self.display_info()
 
         # Exit On Quit Event
@@ -130,8 +131,8 @@ class RaceServer:
         text_rect.center = (900, 500)
         self.screen.blit(text, text_rect)
 
-    # TODO: implement
     def set_best_reward(self):
-        actual_reward = self.cars[0].get_reward()
-        if actual_reward > self.best_reward:
-            self.best_reward = actual_reward
+        for car in self.cars:
+            actual_reward = car.get_reward()
+            if actual_reward > self.best_reward:
+                self.best_reward = actual_reward
