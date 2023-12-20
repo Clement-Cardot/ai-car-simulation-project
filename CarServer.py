@@ -57,7 +57,7 @@ class CarServer:
     def step(self):
         #print("Server Car {} step".format(self.car_id))
         # Receive Action From Client
-        print("Server Car {} WAIT".format(self.car_id))
+        # print("Server Car {} WAIT".format(self.car_id))
         action = 'r'
         while (action == 'r'):
 
