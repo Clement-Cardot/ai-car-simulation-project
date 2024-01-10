@@ -39,7 +39,7 @@ def thread_race(NB_CARS, NB_MAPS):
 
 if __name__ == '__main__':
 
-    NB_MAPS = 2
+    NB_MAPS = 4
     NB_MODEL_MAP = 4
 
     # Start Race Server
