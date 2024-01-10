@@ -40,6 +40,8 @@ class RaceServer:
         self.gen = 1
         self.best_reward = 0
 
+        self.timer = 0
+
         # Draw Map
         self.draw()
         print("Server ready for running !")
@@ -99,10 +101,13 @@ class RaceServer:
         # Draw Cars
         for car in self.cars:
             car.draw()
-            text = self.font.render("ID :" + str(car.car_id), True, (100, 100, 100))
-            text_rect = text.get_rect()
-            text_rect.center = (car.position[0], car.position[1])
-            self.screen.blit(text, text_rect)
+            # text = self.font.render("s: " + str(car.current_sector), True, (100, 100, 100))
+            # text_rect = text.get_rect()
+            # text_rect.center = (car.position[0], car.position[1])
+            # self.screen.blit(text, text_rect)
+            # if car.sectorReward > self.sectorReward :
+            #     self.sectorReward = car.sectorReward
+            
 
         # Display Info
         self.set_best_reward()
@@ -121,12 +126,8 @@ class RaceServer:
 
     def display_info(self):
         # Display Info
-        text = self.font.render("Generation: " + str(self.gen), True, (0, 0, 0))
-        text_rect = text.get_rect()
-        text_rect.center = (900, 460)
-        self.screen.blit(text, text_rect)
-
-        text = self.font.render("Best Reward: " + str(self.best_reward), True, (0, 0, 0))
+        
+        text = self.font.render("Best Reward: " + str(self.best_reward), True, (100, 100, 100))
         text_rect = text.get_rect()
         text_rect.center = (900, 500)
         self.screen.blit(text, text_rect)

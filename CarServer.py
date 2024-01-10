@@ -8,13 +8,17 @@ ACTION_PACKET_REGEX = re.compile("^s(-?[01]\.\d+)t(-?[01]\.\d+)$")
 
 BORDER_COLOR = (255, 255, 255, 255)  # Color To Crash on Hit
 
+SECTOR1_COLOR = (0, 0, 255, 255)
+SECTOR2_COLOR = (0, 255, 0, 255)
+SECTOR3_COLOR = (255, 0, 0, 255)
+
 WIDTH = 1920
 HEIGHT = 1080
 
 CAR_SIZE_X = 60
 CAR_SIZE_Y = 60
 
-MIN_SPEED = 15
+MIN_SPEED = 5
 MAX_SPEED = 40
 
 MAX_THROTTLE = 15
@@ -53,6 +57,13 @@ class CarServer:
 
         self.distance = 0  # Distance Driven
         self.time = 0  # Time Passed
+        
+        self.current_sector = 0
+        self.turnCount = 1
+        
+        self.reward = 0
+        self.sectorReward = 0
+        self.distReward = 0
 
     def step(self):
         #print("Server Car {} step".format(self.car_id))
@@ -120,8 +131,15 @@ class CarServer:
         self.alive = True  # Boolean To Check If Car is Crashed
 
         self.distance = 0  # Distance Driven
-        self.time = 0  # Time Passed
+        self.time = 0  # Time Passed        
+        
+        self.current_sector = 0
+        self.turnCount = 1
 
+        self.reward = 0
+        self.sectorReward = 0
+        self.distReward = 0
+        
         # Run first tick
         self.update()
         obs = self.radars
@@ -187,8 +205,20 @@ class CarServer:
 
     def get_reward(self):
         # Calculate Reward (Maybe Change?)
-        # return self.distance / 50.0
-        return self.distance / (CAR_SIZE_X / 2)
+        #return self.distance / 50.0
+        # return self.distance / (CAR_SIZE_X / 2)
+
+        result = 0
+        if self.time :
+            self.distReward = self.distance/1000 + self.distance / (50 * self.time)
+        else:
+            self.distReward = self.distance/1000 + self.distance / 50
+
+        result -= self.sectorReward
+        result += self.distReward
+        self.reward = result
+
+        return result
 
     def rotate_center(self, image, angle):
         # Rotate The Rectangle
@@ -219,10 +249,38 @@ class CarServer:
         y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
 
         # While We Don't Hit BORDER_COLOR AND length < 300 (just a max) -> go further and further
-        while not self.MAP.get_at((x, y)) == BORDER_COLOR and length < RADAR_MAX_LENGTH:
+        # while not self.MAP.get_at((x, y)) == BORDER_COLOR and length < RADAR_MAX_LENGTH:
+        #     length = length + 1
+        #     x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
+        #     y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+        
+        while 0 <= x < self.MAP.get_width() and 0 <= y < self.MAP.get_height() and (
+                self.MAP.get_at((x, y)) != BORDER_COLOR and
+                self.MAP.get_at((x, y)) != SECTOR1_COLOR and
+                self.MAP.get_at((x, y)) != SECTOR2_COLOR and
+                self.MAP.get_at((x, y)) != SECTOR3_COLOR) and length < RADAR_MAX_LENGTH:
+
             length = length + 1
             x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
             y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
+
+            new_sector = 0
+            if self.MAP.get_at((x, y)) == SECTOR1_COLOR:
+                if self.current_sector == 2:
+                    new_sector = 1
+                self.current_sector = 1
+            if self.MAP.get_at((x, y)) == SECTOR2_COLOR:
+                if self.current_sector == 3:
+                    new_sector = 1
+                self.current_sector = 2
+            if self.MAP.get_at((x, y)) == SECTOR3_COLOR:
+                if self.current_sector == 1:
+                    new_sector = 1                    
+                    self.turnCount += 1
+                self.current_sector = 3
+
+            if new_sector:
+                self.sectorReward += self.current_sector * 1000 / (self.time / self.turnCount)
 
         # Calculate Distance To Border And Append To Radars List
         dist = int(math.sqrt(math.pow(x - self.center[0], 2) + math.pow(y - self.center[1], 2)))
