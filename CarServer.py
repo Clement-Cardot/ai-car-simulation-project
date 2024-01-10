@@ -18,7 +18,7 @@ HEIGHT = 1080
 CAR_SIZE_X = 60
 CAR_SIZE_Y = 60
 
-MIN_SPEED = 5
+MIN_SPEED = 10
 MAX_SPEED = 40
 
 MAX_THROTTLE = 15
@@ -57,10 +57,10 @@ class CarServer:
 
         self.distance = 0  # Distance Driven
         self.time = 0  # Time Passed
-        
+
         self.current_sector = 0
         self.turnCount = 1
-        
+
         self.reward = 0
         self.sectorReward = 0
         self.distReward = 0
@@ -68,7 +68,7 @@ class CarServer:
     def step(self):
         #print("Server Car {} step".format(self.car_id))
         # Receive Action From Client
-        print("Server Car {} WAIT".format(self.car_id))
+        # print("Server Car {} WAIT".format(self.car_id))
         action = 'r'
         while (action == 'r'):
 
@@ -131,15 +131,15 @@ class CarServer:
         self.alive = True  # Boolean To Check If Car is Crashed
 
         self.distance = 0  # Distance Driven
-        self.time = 0  # Time Passed        
-        
+        self.time = 0  # Time Passed
+
         self.current_sector = 0
         self.turnCount = 1
 
         self.reward = 0
         self.sectorReward = 0
         self.distReward = 0
-        
+
         # Run first tick
         self.update()
         obs = self.radars
@@ -253,7 +253,7 @@ class CarServer:
         #     length = length + 1
         #     x = int(self.center[0] + math.cos(math.radians(360 - (self.angle + degree))) * length)
         #     y = int(self.center[1] + math.sin(math.radians(360 - (self.angle + degree))) * length)
-        
+
         while 0 <= x < self.MAP.get_width() and 0 <= y < self.MAP.get_height() and (
                 self.MAP.get_at((x, y)) != BORDER_COLOR and
                 self.MAP.get_at((x, y)) != SECTOR1_COLOR and
@@ -275,7 +275,7 @@ class CarServer:
                 self.current_sector = 2
             if self.MAP.get_at((x, y)) == SECTOR3_COLOR:
                 if self.current_sector == 1:
-                    new_sector = 1                    
+                    new_sector = 1
                     self.turnCount += 1
                 self.current_sector = 3
 

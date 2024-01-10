@@ -1,6 +1,7 @@
 import socket
 import sys
 import threading
+import time
 
 import pygame
 
@@ -37,10 +38,10 @@ class RaceServer:
 
         # Create an empty list of cars
         self.cars = []
-        self.gen = 1
+        self.time = time.time()
+        self.lastFrameTime = round(time.time() * 1000)
+        self.fpsBuffer = []
         self.best_reward = 0
-
-        self.timer = 0
 
         # Draw Map
         self.draw()
@@ -74,7 +75,7 @@ class RaceServer:
         tick = 0
         # Main Loop
         while len(self.cars) > 0:
-            print("\n\nServer : tick {}".format(tick))
+            # print("\n\nServer : tick {}".format(tick))
             car_thread = []
             for index, car in enumerate(self.cars):
                 car_thread.append(threading.Thread(target=self.call_car_step, args=(car,)))
@@ -107,10 +108,11 @@ class RaceServer:
             # self.screen.blit(text, text_rect)
             # if car.sectorReward > self.sectorReward :
             #     self.sectorReward = car.sectorReward
-            
+
 
         # Display Info
         self.set_best_reward()
+        self.set_fps()
         self.display_info()
 
         # Exit On Quit Event
@@ -126,14 +128,31 @@ class RaceServer:
 
     def display_info(self):
         # Display Info
-        
-        text = self.font.render("Best Reward: " + str(self.best_reward), True, (100, 100, 100))
+        text = self.font.render("Time: " + str(round(time.time() - self.time)) + "s", True, (0, 0, 0))
+        text_rect = text.get_rect()
+        text_rect.center = (900, 460)
+        self.screen.blit(text, text_rect)
+
+        text = self.font.render("Best Reward: " + str(self.best_reward), True, (0, 0, 0))
         text_rect = text.get_rect()
         text_rect.center = (900, 500)
         self.screen.blit(text, text_rect)
+
+        text = self.font.render("FPS: " + str(round(sum(self.fpsBuffer) / len(self.fpsBuffer))), True, (0, 0, 0))
+        text_rect = text.get_rect()
+        text_rect.center = (900, 540)
+        self.screen.blit(text, text_rect)
+
+    def set_fps(self):
+        if len(self.fpsBuffer) == 100:
+            self.fpsBuffer.pop(0)
+
+        self.fpsBuffer.append(1000 / (round(time.time() * 1000) - self.lastFrameTime))
+        self.lastFrameTime = round(time.time() * 1000)
+
 
     def set_best_reward(self):
         for car in self.cars:
             actual_reward = car.get_reward()
             if actual_reward > self.best_reward:
-                self.best_reward = actual_reward
+                self.best_reward = round(actual_reward, 2)
