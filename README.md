@@ -93,5 +93,13 @@ We do not use this map in our tests because it is too difficult for the AI and d
 
 
 
+## MultiProcessing
+
+The simulation is a server that runs on a thread. The AI is another server which create workers. each worker is a client that connects to the server. The server sends the state of the game to the client. The client sends the action to the server. The server applies the action to the game and sends the new state to the client. The client receives the new state and sends the new action to the server. And so on...
+
+Here is a diagram of the process:
+
+![MultiProcessing](assets/multiprocessing.png)
+
 ## About us
 This project has been created by a group of students from the ESEO Engineering School in Angers, France. We are 3 students in the 5th year of the school, in the Software Engineering and Artificial Intelligence specialization.
