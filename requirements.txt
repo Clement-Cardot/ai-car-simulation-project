@@ -1,0 +1,3 @@
+pygame==2.5.2
+stable-baselines3[extra]==2.2.1 
+neat-python==0.92

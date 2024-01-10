@@ -51,15 +51,16 @@ def thread_race(NB_CARS, NB_MAPS):
 if __name__ == '__main__':
 
     NB_CARS = 8
-    NB_MAPS = 4
+    ID_MAP = 4
+    ALGO = "A2C"
 
     # Start Race Server
-    race = threading.Thread(target=thread_race, args=(NB_CARS, NB_MAPS))
+    race = threading.Thread(target=thread_race, args=(NB_CARS, ID_MAP))
     race.start()
 
     if NB_CARS == 1:
         # Start Training with Mono Client
-        train_monoproccess("A2C",NB_MAPS)
+        train_monoproccess(ALGO, ID_MAP)
     else:
         # Start Training with AI Clients
-        train_multiproccess("A2C", NB_MAPS, NB_CARS)
+        train_multiproccess(ALGO, ID_MAP, NB_CARS)
