@@ -83,10 +83,10 @@ class CarClient(gym.Env):
         self.conn.send("r".encode('utf-8'))
 
         # Wait for reset packet with a timeout of 2 seconds
-        print("Client {} WAIT RESET. Iteration :".format(self.id))
+        # print("Client {} WAIT RESET. Iteration :".format(self.id))
         global iteration
         iteration += 1
-        print(iteration)
+        # print(iteration)
 
         answer = self.conn.recv(1024).decode('utf-8')
         # print("Client {} received: {}".format(self.id, answer))
