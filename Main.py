@@ -23,23 +23,27 @@ def make_env(rank: int, seed: int = 0) -> Callable:
     set_random_seed(seed)
     return _init
 
-def train_multiproccess(algo, num_cpu=2):
+def train_multiproccess(algo, nb_model_map, num_cpu=2):
     # Multi-processing
     car = SubprocVecEnv([make_env(i) for i in range(num_cpu)])
     match algo:
-        case "DQN":
-            DQNmodel = DQN("MlpPolicy", car).learn(total_timesteps=900000)
+        case "PPO":
+            PPOmodel = PPO("MlpPolicy", car).learn(total_timesteps=900000)
+            PPOmodel.save('./modelPPO/map{}'.format(nb_model_map))
         case "A2C":
-            A2Cmodel = A2C("MlpPolicy", car).learn(total_timesteps=900000)
+            A2Cmodel = A2C("MlpPolicy", car).learn(total_timesteps=500000)
+            A2Cmodel.save('./modelA2C/map{}'.format(nb_model_map))
 
-def train_monoproccess(algo):
+def train_monoproccess(algo, nb_model_map):
     car = CarClient()
     check_env(car)
     match algo:
-        case "DQN":
-            DQNmodel = DQN("MlpPolicy", car).learn(total_timesteps=900000)
+        case "PPO":
+            PPOmodel = PPO("MlpPolicy", car).learn(total_timesteps=900000)
+            PPOmodel.save('./modelPPO/map{}'.format(nb_model_map))
         case "A2C":
-            A2Cmodel = A2C("MlpPolicy", car).learn(total_timesteps=900000)
+            A2Cmodel = A2C("MlpPolicy", car).learn(total_timesteps=500000)
+            A2Cmodel.save('./modelA2C/map{}'.format(nb_model_map))
 
 def thread_race(NB_CARS, NB_MAPS):
     RaceServer(NB_CARS, NB_MAPS).run()
@@ -47,7 +51,7 @@ def thread_race(NB_CARS, NB_MAPS):
 if __name__ == '__main__':
 
     NB_CARS = 8
-    NB_MAPS = 1
+    NB_MAPS = 4
 
     # Start Race Server
     race = threading.Thread(target=thread_race, args=(NB_CARS, NB_MAPS))
@@ -55,7 +59,7 @@ if __name__ == '__main__':
 
     if NB_CARS == 1:
         # Start Training with Mono Client
-        train_monoproccess("A2C")
+        train_monoproccess("A2C",NB_MAPS)
     else:
         # Start Training with AI Clients
-        train_multiproccess("A2C", NB_CARS)
+        train_multiproccess("A2C", NB_MAPS, NB_CARS)
